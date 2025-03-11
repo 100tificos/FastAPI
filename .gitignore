@@ -1,11 +1,9 @@
 # Ignore database files
-*.sqlite3
+curso_fastapi_project/db.sqlite3
 
 # Ignore Python cache files
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
+curso_fastapi_project/__pycache__/
+
 
 # Ignore environment files
 .env
