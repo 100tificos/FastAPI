@@ -1,17 +1,32 @@
-# Ignore database files
-curso_fastapi_project/db.sqlite3
+# Python-specific ignores
 
-# Ignore Python cache files
-curso_fastapi_project/__pycache__/
-
-
-# Ignore environment files
-.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 .venv/
-env/
 venv/
+env/
+*/env/
+*.egg-info/
+dist/
+build/
 
-# Ignore IDE specific files
-.vscode/
-.idea/
-*.swp
+# SQLite Database
+db.sqlite3
+
+# Poetry
+poetry.lock
+
+# IDE specific
+.idea/  # IntelliJ IDEA
+.vscode/ # VS Code
+*.swp # Vim swap files
+*.swo
+
+# OS-specific
+.DS_Store # macOS
+
+# Other
+/logs #If you create log directory to record logs and do not want to track them
+/data #If you create data directory to store datas and do not want to track them
