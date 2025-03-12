@@ -8,6 +8,9 @@ class CustomerBase(SQLModel):
     email: EmailStr = Field(default=None)
     
 class CreateCustomer(CustomerBase):
+    pass 
+
+class UpdateCustomer(CustomerBase):
     pass    
 
 class Customer(CustomerBase, table=True):

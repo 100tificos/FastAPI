@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, status
-from models import Customer, Transaction, Invoice, CreateCustomer
+from models import Customer, Transaction, Invoice, CreateCustomer, UpdateCustomer
 from db import SessionDep, create_all_tables
 from sqlmodel import select
 
@@ -39,6 +39,19 @@ async def delete_customer(customer_id: int, session:SessionDep):
     session.commit()
     return {"detail":"ok"}
 
+#update customer by id
+@app.patch("/customers/{customer_id}", response_model=Customer, status_code=status.HTTP_201_CREATED)
+async def update_customer(customer_id: int, customer_data: UpdateCustomer, session:SessionDep):
+    customer_db = session.get(Customer, customer_id)
+    if not customer_db:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    
+    customer_data_dict = customer_data.model_dump(exclude_unset=True)
+    customer_db.sqlmodel_update(customer_data_dict)
+    session.add(customer_db)
+    session.commit()
+    session.refresh(customer_db)
+    return customer_db
 
 @app.post("/transactions") 
 async def create_transaction(transaction_data: Transaction): 
