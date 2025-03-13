@@ -1,16 +1,15 @@
-from fastapi import FastAPI, HTTPException, status
-from models import Customer, Transaction, Invoice, CreateCustomer, UpdateCustomer
-from db import SessionDep, create_all_tables
+from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
+from models import Customer, CreateCustomer, UpdateCustomer
+from db import SessionDep
 
-app = FastAPI(lifespan=create_all_tables) # Crea una instancia de la clase FastAPI 
 
+router = APIRouter()
 
-db_customer: list[Customer] = [] # Variable global para almacenar el ID actual
 
 #create customer
-@app.post("/customers" , response_model=Customer) # Decorator que define una ruta para el método POST con un modelo de respuesta 
-async def create_customer(customer_data: CreateCustomer, session:SessionDep): # Método que se ejecuta cuando se envía una solicitud POST a la ruta "/customers"
+@router.post("/customers" , response_model=Customer, status_code=status.HTTP_201_CREATED, tags=['Customers']) # Decorator que define una ruta para el método POST con un modelo de respuesta 
+async def create_customer(customer_data: CreateCustomer, session:SessionDep, ): # Método que se ejecuta cuando se envía una solicitud POST a la ruta "/customers"
     customer = Customer.model_validate(customer_data.model_dump()) 
     session.add(customer) 
     session.commit() 
@@ -18,19 +17,19 @@ async def create_customer(customer_data: CreateCustomer, session:SessionDep): # 
     return customer 
 
 #get list of customers
-@app.get("/customers",response_model=list[Customer])
+@router.get("/customers",response_model=list[Customer],status_code=status.HTTP_200_OK, tags=['Customers'])
 async def list_customers(session:SessionDep):
     return session.exec(select(Customer)).all()
     
 #get customer by id
-@app.get("/customers/{customer_id}")
+@router.get("/customers/{customer_id}",status_code=status.HTTP_200_OK, tags=['Customers'])
 async def read_customer(customer_id: int, session:SessionDep): 
     if  session.get(Customer, customer_id) == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found")
     return session.get(Customer, customer_id)
 
 #delete customer by id
-@app.delete("/customers/{customer_id}")
+@router.delete("/customers/{customer_id}", status_code=status.HTTP_204_NO_CONTENT, tags=['Customers'])
 async def delete_customer(customer_id: int, session:SessionDep):
     customer_db = session.get(Customer, customer_id)
     if not customer_db:
@@ -40,7 +39,7 @@ async def delete_customer(customer_id: int, session:SessionDep):
     return {"detail":"ok"}
 
 #update customer by id
-@app.patch("/customers/{customer_id}", response_model=Customer, status_code=status.HTTP_201_CREATED)
+@router.patch("/customers/{customer_id}", response_model=Customer, status_code=status.HTTP_201_CREATED, tags=['Customers'])
 async def update_customer(customer_id: int, customer_data: UpdateCustomer, session:SessionDep):
     customer_db = session.get(Customer, customer_id)
     if not customer_db:
@@ -52,11 +51,3 @@ async def update_customer(customer_id: int, customer_data: UpdateCustomer, sessi
     session.commit()
     session.refresh(customer_db)
     return customer_db
-
-@app.post("/transactions") 
-async def create_transaction(transaction_data: Transaction): 
-    return transaction_data 
-
-@app.post("/invoices")
-async def create_invoice(invoice_data: Invoice):
-    return create_invoice
